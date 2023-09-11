@@ -6,7 +6,7 @@
 
 [力扣题目链接](https://leetcode.cn/problems/binary-search/)
 
-取中间值时需要考虑可能移除：mid = left + ((right - left) >> 1)
+取中间值时需要考虑可能溢出：mid = left + ((right - left) >> 1)
 
 - 左闭右闭 (记住这个就好)
 
