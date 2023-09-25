@@ -540,3 +540,263 @@ class Solution {
 }
 ```
 
+### 两两交换链表中的节点
+
+[力扣题目链接](https://leetcode.cn/problems/swap-nodes-in-pairs/)
+
+***一定要画图！***
+
+***这个题最好设置一个虚拟头节点！***
+
+- 递归法
+
+```java
+// 递归版本
+class Solution {
+    public ListNode swapPairs(ListNode head) {
+        // base case 退出提交
+        if(head == null || head.next == null) return head;
+        // 获取当前节点的下一个节点
+        ListNode next = head.next;
+        // 进行递归
+        ListNode newNode = swapPairs(next.next);
+        // 这里进行交换
+        next.next = head;
+        head.next = newNode;
+
+        return next;
+    }
+} 
+```
+
+- 常规法
+
+```java
+class Solution {
+    public ListNode swapPairs(ListNode head) {
+        ListNode l1 = new ListNode(0,head);
+        ListNode l2 = l1;
+        while (l2.next != null && l2.next.next != null) {
+            ListNode first = l2.next;
+            ListNode second = l2.next.next;
+            ListNode third = l2.next.next.next;
+            l2.next = second;
+            first.next = third;
+            second.next = first;
+            l2 = l2.next.next;
+        }
+        return l1.next;q
+        // ListNode l = new ListNode(0, head);
+        // ListNode cur = l;
+        // while (cur != null && cur.next != null && cur.next.next != null) {
+        //     ListNode first = cur;
+        //     ListNode second = cur.next;
+        //     ListNode third = cur.next.next;
+        //     cur = cur.next.next.next;
+        //     first.next = third;
+        //     third.next = second;
+        //     second.next = cur;
+        //     cur = second;
+        // }
+        // return l.next;
+    }
+}
+```
+
+### 删除链表的倒数第N个节点
+
+[力扣题目链接](https://leetcode.cn/problems/remove-nth-node-from-end-of-list/)
+
+- 快慢指针法：快指针先走n+1步，然后快慢指针一起走，当快指针到链表结尾时，慢指针位于链表倒数第N个节点的上一个节点，然后删除对应节点。
+
+```java
+public ListNode removeNthFromEnd(ListNode head, int n){
+    ListNode dummyNode = new ListNode(0);
+    dummyNode.next = head;
+
+    ListNode fastIndex = dummyNode;
+    ListNode slowIndex = dummyNode;
+
+    //只要快慢指针相差 n 个结点即可
+    for (int i = 0; i < n  ; i++){
+        fastIndex = fastIndex.next;
+    }
+
+    while (fastIndex.next != null){
+        fastIndex = fastIndex.next;
+        slowIndex = slowIndex.next;
+    }
+
+    //此时 slowIndex 的位置就是待删除元素的前一个位置。
+    //具体情况可自己画一个链表长度为 3 的图来模拟代码来理解
+    slowIndex.next = slowIndex.next.next;
+    return dummyNode.next;
+}
+```
+
+### 链表相交 ——面试题
+
+[力扣题目链接](https://leetcode.cn/problems/intersection-of-two-linked-lists-lcci/)
+
+- 哈希表检索：将链表A存入哈希表，然后遍历链表B，找到相同的节点返回。
+
+  时间复杂度：O(n+m)  空间复杂度：O(n)
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        Set<ListNode> visited = new HashSet<ListNode>();
+        ListNode temp = headA;
+        while (temp != null) {
+            visited.add(temp);
+            temp = temp.next;
+        }
+        temp = headB;
+        while (temp != null) {
+            if (visited.contains(temp)) {
+                return temp;
+            }
+            temp = temp.next;
+        }
+        return null;
+    }
+}
+```
+
+- 快慢指针法：获得链表A和链表B的长度差，让长的链表先走相差的步数，从而使得两个链表同步进行。
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode curA = headA;
+        ListNode curB = headB;
+        int lenA = 0, lenB = 0;
+        while (curA != null) { // 求链表A的长度
+            lenA++;
+            curA = curA.next;
+        }
+        while (curB != null) { // 求链表B的长度
+            lenB++;
+            curB = curB.next;
+        }
+        curA = headA;
+        curB = headB;
+        // 让curA为最长链表的头，lenA为其长度
+        if (lenB > lenA) {
+            //1. swap (lenA, lenB);
+            int tmpLen = lenA;
+            lenA = lenB;
+            lenB = tmpLen;
+            //2. swap (curA, curB);
+            ListNode tmpNode = curA;
+            curA = curB;
+            curB = tmpNode;
+        }
+        // 求长度差
+        int gap = lenA - lenB;
+        // 让curA和curB在同一起点上（末尾位置对齐）
+        while (gap-- > 0) {
+            curA = curA.next;
+        }
+        // 遍历curA 和 curB，遇到相同则直接返回
+        while (curA != null) {
+            if (curA == curB) {
+                return curA;
+            }
+            curA = curA.next;
+            curB = curB.next;
+        }
+        return null;
+    }
+
+}
+```
+
+- 数学：同步遍历链表A与链表B，如果遍历到链表尾则续上另一个链表，则当节点相同时就是交叉点。
+
+  
+
+  链表 headA和 headB 的长度分别是 m和 n。假设链表 headA 的不相交部分有 a 个节点，链表 headB的不相交部分有 b 个节点，两个链表相交的部分有 c 个节点，则有 a+c=m，b+c=n。
+
+  
+
+  指针 pA 会遍历完链表 headA，指针 pB 会遍历完链表 headB，两个指针不会同时到达链表的尾节点，然后指针 pA移到链表 headB 的头节点，指针 pB 移到链表 headA 的头节点，然后两个指针继续移动，在指针 pA 移动了 a+c+b 次、指针 pB 移动了 b+c+a 次之后，两个指针会同时到达两个链表相交的节点，该节点也是两个指针第一次同时指向的节点，此时返回相交的节点。
+
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
+        }
+        ListNode pA = headA, pB = headB;
+        while (pA != pB) {
+            pA = pA == null ? headB : pA.next;
+            pB = pB == null ? headA : pB.next;
+        }
+        return pA;
+    }
+}
+```
+
+### 环形链表II
+
+[力扣题目链接](https://leetcode.cn/problems/linked-list-cycle-ii/)
+
+- 哈希表检索：遍历链表，如果哈希表没有则存入，否则返回该节点。
+
+  时间复杂度：O(n)  空间复杂度：O(n)
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        HashSet<ListNode> set = new HashSet<>();
+        while (head != null) {
+            if (!set.contains(head)) {
+                set.add(head);
+            }else {
+                return head;
+            }
+            head = head.next;
+        }
+        return null;
+    }
+}
+```
+
+- 快慢指针法：
+
+  **首先判断是否有环。**
+
+  可以使用快慢指针法，分别定义 fast 和 slow 指针，从头结点出发，fast指针每次移动两个节点，slow指针每次移动一个节点，如果 fast 和 slow指针在途中相遇 ，说明这个链表有环。
+
+  **然后如果有环找到环的入口。**
+
+  从头结点出发一个指针，从相遇节点 也出发一个指针，这两个指针每次只走一个节点， 那么当这两个指针相遇的时候就是 环形入口的节点。
+
+  ![](image\142.环形链表II（求入口）.gif)
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {// 有环
+                ListNode index1 = fast;
+                ListNode index2 = head;
+                // 两个指针，从头结点和相遇结点，各走一步，直到相遇，相遇点即为环入口
+                while (index1 != index2) {
+                    index1 = index1.next;
+                    index2 = index2.next;
+                }
+                return index1;
+            }
+        }
+        return null;
+    }
+}
+```
+
